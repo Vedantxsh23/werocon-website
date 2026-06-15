@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IMU — Raspberry OS Setup | WeRoCon</title>
+  <link rel="icon" href="../images/logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page="imu">
+
+  <!-- ============ NAV ============ -->
+  <nav class="nav">
+    <div class="wrap">
+      <a href="../index.html" class="nav-brand">
+        <img src="../images/logo.png" alt="WeRoCon logo">
+        <div class="nav-brand-text">
+          <span class="name">WeRoCon</span>
+          <span class="sub">Wearable Robotics Control</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="../index.html" data-page="home">Overview</a>
+        <a href="imu.html" data-page="imu" class="active">IMU</a>
+        <a href="motor-control.html" data-page="motor">Motor Control</a>
+        <a href="mechanical.html" data-page="mech">Mechanical</a>
+        <a href="../index.html#team" data-page="team">Team</a>
+      </div>
+      <div class="nav-tag">
+        <span class="dot"></span> I2C ADDR 0x68
+      </div>
+      <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <!-- ============ PAGE HEADER ============ -->
+  <header class="page-header">
+    <div class="wrap">
+      <div class="eyebrow">Module 01 / Sensing — Raspberry OS Setup</div>
+      <h1>IMU — Inertial Measurement</h1>
+      <p>
+        Step-by-step setup for the prosthesis's sensing core: flash Raspberry Pi OS
+        onto the Pi 5, connect over SSH, then wire and read a 6-axis MPU6250
+        accelerometer + gyroscope over I2C to capture gait-phase data.
+      </p>
+      <div class="status-row">
+        <div class="status-item">PLATFORM <span class="val">Raspberry Pi 5</span></div>
+        <div class="status-item">SENSOR <span class="val">MPU6250 (6-axis IMU)</span></div>
+        <div class="status-item">BUS <span class="val">I2C — /dev/i2c-1</span></div>
+        <div class="status-item">DEFAULT ADDR <span class="val">0x68</span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ DOC LAYOUT ============ -->
+  <div class="wrap doc-layout">
+
+    <!-- TOC -->
+    <aside class="doc-toc">
+      <div class="toc-label">On this page</div>
+      <ul>
+        <li><a href="#what-you-need">What you need</a></li>
+        <li><a href="#step1">1 — Download Imager</a></li>
+        <li><a href="#step2">2 — Insert microSD</a></li>
+        <li><a href="#step3">3 — Select Device & OS</a></li>
+        <li><a href="#step4">4 — Edit Settings</a></li>
+        <li><a href="#step5">5 — Boot the Pi</a></li>
+        <li><a href="#step6">6 — Connect via SSH</a></li>
+        <li><a href="#step7">7 — Update System</a></li>
+        <li><a href="#summary1">Flash → SSH summary</a></li>
+        <li><a href="#mpu-need">MPU6250 — extra parts</a></li>
+        <li><a href="#step8">8 — Enable I2C</a></li>
+        <li><a href="#step9">9 — Wire the MPU6250</a></li>
+        <li><a href="#step10">10 — Install libraries</a></li>
+        <li><a href="#step11">11 — Detect on I2C bus</a></li>
+        <li><a href="#step12">12 — Read IMU data</a></li>
+        <li><a href="#troubleshoot">Troubleshooting</a></li>
+        <li><a href="#summary2">Full flow summary</a></li>
+      </ul>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="doc-content">
+
+      <h2 id="what-you-need">What you need</h2>
+      <table>
+        <tr><th>Item</th><th>Details</th></tr>
+        <tr><td>Raspberry Pi 5</td><td>4GB or 8GB</td></tr>
+        <tr><td>microSD Card</td><td>Minimum 16GB, Class 10</td></tr>
+        <tr><td>microSD Card Reader</td><td>USB adapter</td></tr>
+        <tr><td>Power Supply</td><td>USB-C 5V 5A (official Pi 5 adapter)</td></tr>
+        <tr><td>Laptop / PC</td><td>Windows / macOS / Linux</td></tr>
+        <tr><td>WiFi</td><td>2.4GHz or 5GHz network</td></tr>
+      </table>
+
+      <h2 id="step1">Step 1 — Download Raspberry Pi Imager</h2>
+      <p>On your laptop, download the imager from:</p>
+      <pre>https://www.raspberrypi.com/software/</pre>
+      <p>Install and open it.</p>
+
+      <h2 id="step2">Step 2 — Insert microSD Card</h2>
+      <p>Plug your microSD card into the card reader, then plug it into your laptop.</p>
+
+      <h2 id="step3">Step 3 — Select Device, OS & Storage</h2>
+      <p>In Raspberry Pi Imager, set the following:</p>
+      <table>
+        <tr><th>Field</th><th>What to Choose</th></tr>
+        <tr><td>Choose Device</td><td>Raspberry Pi 5</td></tr>
+        <tr><td>Choose OS</td><td>Raspberry Pi OS (other) → <code>Raspberry Pi OS Lite (64-bit)</code></td></tr>
+        <tr><td>Choose Storage</td><td>Your microSD card</td></tr>
+      </table>
+      <p>Click <strong>Next</strong>.</p>
+
+      <h2 id="step4">Step 4 — Edit Settings (Important)</h2>
+      <p>When asked to apply custom settings → click <strong>Edit Settings</strong>.</p>
+
+      <h3>General tab</h3>
+      <pre>Hostname:       raspberrypi
+Username:       pi
+Password:       [choose a password]
+WiFi SSID:      [your WiFi name]
+WiFi Password:  [your WiFi password]</pre>
+
+      <h3>Services tab</h3>
+      <pre>[x] Enable SSH   ← Must turn this ON</pre>
+
+      <p>Click <strong>Save → Yes → Yes</strong>.</p>
+      <blockquote>⏳ Flashing takes about 5–10 minutes.</blockquote>
+
+      <h2 id="step5">Step 5 — Boot the Pi</h2>
+      <p>
+        Eject the microSD card from your laptop, insert it into the
+        <strong>bottom slot</strong> of the Raspberry Pi 5, plug in the power
+        cable, then wait <strong>60 seconds</strong>.
+      </p>
+
+      <h2 id="step6">Step 6 — Connect via SSH</h2>
+      <p>Open Terminal (Mac/Linux) or Command Prompt (Windows):</p>
+      <pre>ssh pi@raspberrypi.local</pre>
+      <p>Type your password when asked. You should see:</p>
+      <pre>pi@raspberrypi:~ $</pre>
+      <blockquote>
+        If it doesn't connect, find your Pi's IP from your WiFi router and try:
+        <pre style="margin-top:10px;">ssh pi@192.168.x.x</pre>
+      </blockquote>
+
+      <h2 id="step7">Step 7 — Update the System</h2>
+      <p>Once connected, run:</p>
+      <pre>sudo apt update && sudo apt upgrade -y</pre>
+      <p>Done — your Raspberry Pi 5 is ready to use. ✅</p>
+
+      <h2 id="summary1">Quick Summary — Flash to SSH</h2>
+      <div class="flow-diagram">Download Raspberry Pi Imager on laptop
+            │
+   Insert microSD into laptop
+            │
+  <span class="step">Imager → Pi 5 → OS Lite 64-bit → microSD</span>
+            │
+  Edit Settings → WiFi + SSH + Username
+            │
+     Click Write → Wait 10 mins
+            │
+  Insert microSD into Pi 5 → Power ON
+            │
+   <span class="step">ssh pi@raspberrypi.local ✅</span></div>
+
+      <hr class="doc-hr">
+
+      <!-- ===================== MPU6250 SECTION ===================== -->
+
+      <h2 id="mpu-need" style="margin-top:0;">MPU6250 — Wiring & Setup</h2>
+      <p>
+        Connect and read accelerometer + gyroscope data from the MPU6250
+        using I2C on the Raspberry Pi 5.
+      </p>
+
+      <h3>What you need (extra)</h3>
+      <table>
+        <tr><th>Item</th><th>Details</th></tr>
+        <tr><td>MPU6250 Module</td><td>6-axis IMU (Accelerometer + Gyroscope)</td></tr>
+        <tr><td>Jumper Wires</td><td>4x Female-to-Female</td></tr>
+        <tr><td>Breadboard</td><td>Optional, for easy wiring</td></tr>
+      </table>
+
+      <h2 id="step8">Step 8 — Enable I2C on Raspberry Pi 5</h2>
+      <p>The MPU6250 communicates via <strong>I2C</strong>, which is disabled by default. Enable it:</p>
+      <pre>sudo raspi-config</pre>
+      <p>Navigate using arrow keys:</p>
+      <pre>Interface Options → I2C → Yes → OK → Finish</pre>
+      <p>Then reboot:</p>
+      <pre>sudo reboot</pre>
+      <p>SSH back in after reboot:</p>
+      <pre>ssh pi@raspberrypi.local</pre>
+      <p>Verify I2C is active:</p>
+      <pre>ls /dev/i2c*
+<span class="cmt"># Should show: /dev/i2c-1</span></pre>
+
+      <h2 id="step9">Step 9 — Wire the MPU6250 to Raspberry Pi 5</h2>
+      <p>Connect using <strong>4 jumper wires</strong> only:</p>
+      <table>
+        <tr><th>MPU6250 Pin</th><th>Raspberry Pi 5 Pin</th><th>Description</th></tr>
+        <tr><td><code>VCC</code></td><td>Pin 1 — 3.3V</td><td>Power</td></tr>
+        <tr><td><code>GND</code></td><td>Pin 6 — GND</td><td>Ground</td></tr>
+        <tr><td><code>SDA</code></td><td>Pin 3 — GPIO 2</td><td>I2C Data</td></tr>
+        <tr><td><code>SCL</code></td><td>Pin 5 — GPIO 3</td><td>I2C Clock</td></tr>
+      </table>
+
+      <blockquote class="warn">
+        ⚠ Always use <strong>3.3V</strong> for VCC — never 5V. The MPU6250 is a 3.3V sensor
+        and 5V will damage it.
+      </blockquote>
+
+      <h3>Pi 5 GPIO Diagram (relevant pins)</h3>
+      <div class="gpio-table">
+        <div class="gpio-row highlight">
+          <span class="pin-num">1</span>
+          <span class="pin-label power">3.3V</span>
+          <span class="pin-desc">← VCC (MPU6250 power)</span>
+        </div>
+        <div class="gpio-row">
+          <span class="pin-num">2</span>
+          <span class="pin-label power">5V</span>
+          <span class="pin-desc">not used</span>
+        </div>
+        <div class="gpio-row highlight">
+          <span class="pin-num">3</span>
+          <span class="pin-label data">GPIO 2 (SDA)</span>
+          <span class="pin-desc">← SDA (I2C Data)</span>
+        </div>
+        <div class="gpio-row">
+          <span class="pin-num">4</span>
+          <span class="pin-label power">5V</span>
+          <span class="pin-desc">not used</span>
+        </div>
+        <div class="gpio-row highlight">
+          <span class="pin-num">5</span>
+          <span class="pin-label data">GPIO 3 (SCL)</span>
+          <span class="pin-desc">← SCL (I2C Clock)</span>
+        </div>
+        <div class="gpio-row highlight">
+          <span class="pin-num">6</span>
+          <span class="pin-label gnd">GND</span>
+          <span class="pin-desc">← GND (Ground)</span>
+        </div>
+      </div>
+
+      <h3>AD0 pin — I2C address</h3>
+      <table>
+        <tr><th>AD0</th><th>I2C Address</th></tr>
+        <tr><td>GND (or unconnected)</td><td><code>0x68</code> ← default</td></tr>
+        <tr><td>3.3V</td><td><code>0x69</code></td></tr>
+      </table>
+      <p>Leave AD0 unconnected to use the default address <code>0x68</code>.</p>
+
+      <h2 id="step10">Step 10 — Install Required Libraries</h2>
+
+      <h3>Install I2C tools</h3>
+      <pre>sudo apt install -y i2c-tools python3-smbus</pre>
+
+      <h3>Create a virtual environment</h3>
+      <pre>python3 -m venv .venv
+source .venv/bin/activate</pre>
+      <blockquote>You will see <code>(.venv)</code> at the start of your terminal — this means it is active.</blockquote>
+
+      <h3>Install Python libraries</h3>
+      <pre>pip install smbus2
+pip install mpu6050-raspberrypi</pre>
+
+      <h3>Library overview</h3>
+      <table>
+        <tr><th>Library</th><th>Purpose</th></tr>
+        <tr><td><code>smbus2</code></td><td>Communicate with I2C devices from Python</td></tr>
+        <tr><td><code>mpu6050-raspberrypi</code></td><td>Ready-made driver to read MPU6250/6050 data</td></tr>
+        <tr><td><code>i2c-tools</code></td><td>Scan and detect I2C devices on the bus</td></tr>
+        <tr><td><code>python3-smbus</code></td><td>System-level I2C support</td></tr>
+      </table>
+
+      <h2 id="step11">Step 11 — Detect MPU6250 on I2C Bus</h2>
+      <p>Run a scan to confirm the sensor is wired correctly and detected:</p>
+      <pre>sudo i2cdetect -y 1</pre>
+      <p>Expected output:</p>
+      <pre>     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+60: -- -- -- -- -- -- -- -- <span class="kw">68</span> -- -- -- -- -- -- --
+70: -- -- -- -- -- -- -- --</pre>
+      <blockquote>
+        <code>68</code> appearing = MPU6250 successfully detected ✅<br>
+        Nothing showing = recheck your wiring
+      </blockquote>
+
+      <h2 id="step12">Step 12 — Read IMU Data</h2>
+      <p>Create a Python script:</p>
+      <pre>nano read_mpu.py</pre>
+      <p>Paste this code:</p>
+      <pre><span class="kw">import</span> smbus2
+<span class="kw">import</span> time
+
+MPU6250_ADDR = 0x68   <span class="cmt"># Change to 0x69 if AD0 is connected to 3.3V</span>
+PWR_MGMT_1   = 0x6B
+ACCEL_XOUT_H = 0x3B
+GYRO_XOUT_H  = 0x43
+TEMP_OUT_H   = 0x41
+
+bus = smbus2.SMBus(1)
+
+<span class="cmt"># Wake up the MPU6250</span>
+bus.write_byte_data(MPU6250_ADDR, PWR_MGMT_1, 0x00)
+time.sleep(0.1)
+
+<span class="kw">def</span> read_word(reg):
+    high  = bus.read_byte_data(MPU6250_ADDR, reg)
+    low   = bus.read_byte_data(MPU6250_ADDR, reg + 1)
+    value = (high << 8) | low
+    <span class="kw">if</span> value >= 0x8000:
+        value -= 65536
+    <span class="kw">return</span> value
+
+<span class="kw">def</span> get_accel():
+    ax = read_word(ACCEL_XOUT_H)     / 16384.0
+    ay = read_word(ACCEL_XOUT_H + 2) / 16384.0
+    az = read_word(ACCEL_XOUT_H + 4) / 16384.0
+    <span class="kw">return</span> ax, ay, az
+
+<span class="kw">def</span> get_gyro():
+    gx = read_word(GYRO_XOUT_H)     / 131.0
+    gy = read_word(GYRO_XOUT_H + 2) / 131.0
+    gz = read_word(GYRO_XOUT_H + 4) / 131.0
+    <span class="kw">return</span> gx, gy, gz
+
+<span class="kw">def</span> get_temp():
+    raw = read_word(TEMP_OUT_H)
+    <span class="kw">return</span> (raw / 340.0) + 36.53
+
+print(<span class="str">"MPU6250 Live Data — Press Ctrl+C to stop\n"</span>)
+
+<span class="kw">try</span>:
+    <span class="kw">while</span> True:
+        ax, ay, az = get_accel()
+        gx, gy, gz = get_gyro()
+        temp       = get_temp()
+
+        print(f<span class="str">"Accel (g)    X:{ax:+.3f}  Y:{ay:+.3f}  Z:{az:+.3f}"</span>)
+        print(f<span class="str">"Gyro (°/s)   X:{gx:+.3f}  Y:{gy:+.3f}  Z:{gz:+.3f}"</span>)
+        print(f<span class="str">"Temp (°C)    {temp:.2f}"</span>)
+        print(<span class="str">"-"</span> * 45)
+        time.sleep(0.5)
+
+<span class="kw">except</span> KeyboardInterrupt:
+    print(<span class="str">"Stopped."</span>)</pre>
+
+      <p>Save with <code>Ctrl+X → Y → Enter</code>, then run it:</p>
+      <pre>python3 read_mpu.py</pre>
+
+      <h3>Expected output</h3>
+      <pre>Accel (g)    X:-0.012  Y:+0.004  Z:+1.001
+Gyro (°/s)   X:+0.213  Y:-0.152  Z:+0.031
+Temp (°C)    28.54
+---------------------------------------------</pre>
+
+      <h2 id="troubleshoot">Troubleshooting</h2>
+      <table>
+        <tr><th>Problem</th><th>Fix</th></tr>
+        <tr><td><code>i2cdetect</code> shows nothing</td><td>Recheck wiring — SDA→Pin3, SCL→Pin5, VCC→3.3V, GND→GND</td></tr>
+        <tr><td>Permission denied on I2C</td><td>Run <code>sudo usermod -aG i2c pi</code> then log out and back in</td></tr>
+        <tr><td><code>ModuleNotFoundError: smbus2</code></td><td>Run <code>source .venv/bin/activate</code> then <code>pip install smbus2</code></td></tr>
+        <tr><td>All readings are 0</td><td>Reinstall: <code>pip uninstall smbus2 && pip install smbus2</code></td></tr>
+        <tr><td>Address shows <code>69</code> not <code>68</code></td><td>Change <code>MPU6250_ADDR = 0x69</code> in the script</td></tr>
+      </table>
+
+      <h2 id="summary2">Full Flow Summary</h2>
+      <div class="flow-diagram"><span class="step">Enable I2C → sudo raspi-config</span>
+            │
+  Wire MPU6250:
+  VCC→Pin1(3.3V) | GND→Pin6 | SDA→Pin3 | SCL→Pin5
+            │
+  sudo i2cdetect -y 1 → confirm "68"
+            │
+  source .venv/bin/activate
+  pip install smbus2 mpu6050-raspberrypi
+            │
+  <span class="step">python3 read_mpu.py  ✅  Live IMU readings!</span></div>
+
+      <div style="margin-top: 64px; display:flex; gap:16px; flex-wrap:wrap;">
+        <a href="motor-control.html" class="btn btn-primary">Next: Motor Control →</a>
+        <a href="../index.html" class="btn btn-ghost">← Back to Overview</a>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-brand">
+        <img src="../images/logo.png" alt="WeRoCon logo">
+        <span>WEROCON — WEARABLE ROBOTICS CONTROL · IIT JODHPUR</span>
+      </div>
+      <div class="footer-links">
+        <a href="imu.html">IMU</a>
+        <a href="motor-control.html">Motor Control</a>
+        <a href="mechanical.html">Mechanical</a>
+        <a href="../index.html#team">Team</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>
