@@ -9,11 +9,589 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
-  <!-- Updated CSS -->
-  <link rel="stylesheet" href="css/werocon-theme%20(1).css">
+  <link rel="stylesheet" href="css/werocon-theme (1).css">
+
+  <style>
+    /* ── Layout helpers ── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    .wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* ── Nav ── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(6, 8, 13, 0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--wr-line);
+    }
+
+    .nav .wrap {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      height: 64px;
+      position: relative;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .nav-brand img {
+      height: 32px;
+      width: auto;
+    }
+
+    .nav-brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .nav-brand-text .name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--wr-text);
+      letter-spacing: 0.04em;
+    }
+
+    .nav-brand-text .sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--wr-cyan);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 4px;
+      margin-left: auto;
+    }
+
+    .nav-links a {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--wr-text-2);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--wr-cyan);
+    }
+
+    .nav-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--wr-text-3);
+      letter-spacing: 0.1em;
+      border: 1px solid var(--wr-line-2);
+      padding: 6px 12px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .nav-tag .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--wr-yellow);
+      box-shadow: 0 0 8px var(--wr-yellow);
+      animation: wr-blink 2.4s infinite;
+    }
+
+    @keyframes wr-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.25; }
+    }
+
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .nav-toggle span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--wr-text);
+      border-radius: 2px;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-tag { display: none; }
+      .nav-toggle { display: flex; margin-left: auto; }
+    }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 140px 0 80px;
+      background: var(--wr-bg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(79,209,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,209,255,0.025) 1px, transparent 1px);
+      background-size: 64px 64px;
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--wr-cyan);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 22px;
+      height: 1px;
+      background: var(--wr-cyan);
+      display: inline-block;
+    }
+
+    .hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(40px, 5.5vw, 64px);
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--wr-text);
+      margin-bottom: 24px;
+    }
+
+    .hero h1 .accent {
+      color: var(--wr-cyan);
+    }
+
+    .lead {
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--wr-text-2);
+      max-width: 480px;
+      margin-bottom: 36px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 14px 26px;
+      border-radius: 4px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.25s;
+    }
+
+    .btn-primary {
+      background: var(--wr-cyan);
+      color: #03141c;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 24px rgba(79, 209, 255, 0.35);
+      transform: translateY(-2px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--wr-text);
+      border: 1px solid var(--wr-line-2);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--wr-cyan);
+      color: var(--wr-cyan);
+    }
+
+    .hero-visual {
+      position: relative;
+      border: 1px solid var(--wr-line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--wr-panel);
+    }
+
+    .hero-visual img {
+      width: 100%;
+      display: block;
+      filter: saturate(0.85) contrast(1.08);
+    }
+
+    .hero-visual-tag {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      background: rgba(6,8,13,0.7);
+      border: 1px solid var(--wr-line-2);
+      color: var(--wr-cyan);
+      padding: 6px 12px;
+      border-radius: 4px;
+      backdrop-filter: blur(6px);
+      z-index: 2;
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-visual { order: -1; }
+    }
+
+    /* ── Section base ── */
+    .section {
+      padding: 80px 0;
+      border-top: 1px solid var(--wr-line);
+    }
+
+    .section-head {
+      margin-bottom: 48px;
+      max-width: 620px;
+    }
+
+    .section-head h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(28px, 3.5vw, 40px);
+      font-weight: 700;
+      color: var(--wr-text);
+      margin: 12px 0 16px;
+    }
+
+    .section-head p {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--wr-text-2);
+    }
+
+    /* ── Stats strip ── */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--wr-line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .stat {
+      padding: 28px 20px;
+      border-right: 1px solid var(--wr-line);
+      background: var(--wr-panel);
+      text-align: center;
+    }
+
+    .stat:last-child { border-right: none; }
+
+    .stat .num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--wr-cyan);
+    }
+
+    .stat .lbl {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--wr-text-3);
+      margin-top: 6px;
+    }
+
+    @media (max-width: 600px) {
+      .stats-strip { grid-template-columns: repeat(2, 1fr); }
+      .stat:nth-child(2) { border-right: none; }
+      .stat:nth-child(odd) { border-right: 1px solid var(--wr-line); }
+    }
+
+    /* ── Module grid ── */
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .module-card {
+      background: var(--wr-panel);
+      border: 1px solid var(--wr-line);
+      border-radius: 8px;
+      padding: 32px;
+      position: relative;
+      transition: border-color 0.25s, transform 0.25s;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 260px;
+      text-decoration: none;
+    }
+
+    .module-card:hover {
+      border-color: var(--wr-cyan-dim);
+      transform: translateY(-4px);
+    }
+
+    .mod-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--wr-text-3);
+      letter-spacing: 0.18em;
+    }
+
+    .mod-status {
+      position: absolute;
+      top: 28px;
+      right: 28px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 100px;
+      border: 1px solid var(--wr-line-2);
+      color: var(--wr-text-3);
+    }
+
+    .mod-status.live {
+      color: var(--wr-yellow);
+      border-color: rgba(255, 210, 63, 0.3);
+    }
+
+    .module-card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--wr-text);
+    }
+
+    .module-card p {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--wr-text-2);
+      flex-grow: 1;
+    }
+
+    .mod-link {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--wr-cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mod-link::after {
+      content: "→";
+      transition: transform 0.2s;
+    }
+
+    .module-card:hover .mod-link::after {
+      transform: translateX(4px);
+    }
+
+    @media (max-width: 900px) {
+      .module-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Team card ── */
+    .team-card {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 40px;
+      background: var(--wr-panel);
+      border: 1px solid var(--wr-line);
+      border-radius: 8px;
+      padding: 40px;
+      align-items: center;
+    }
+
+    .team-photo {
+      width: 220px;
+      height: 220px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--wr-line-2);
+      flex-shrink: 0;
+    }
+
+    .team-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: saturate(0.9);
+    }
+
+    .team-info .role {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--wr-cyan);
+      margin-bottom: 8px;
+    }
+
+    .team-info h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--wr-text);
+      margin-bottom: 6px;
+    }
+
+    .team-info .affil {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--wr-text-2);
+      margin-bottom: 20px;
+    }
+
+    .team-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .team-links a {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      letter-spacing: 0.06em;
+      border: 1px solid var(--wr-line-2);
+      padding: 9px 16px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--wr-text-2);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .team-links a:hover {
+      border-color: var(--wr-cyan);
+      color: var(--wr-cyan);
+    }
+
+    @media (max-width: 600px) {
+      .team-card { grid-template-columns: 1fr; text-align: center; }
+      .team-photo { margin: 0 auto; }
+      .team-links { justify-content: center; }
+    }
+
+    /* ── Footer ── */
+    .footer {
+      background: var(--wr-bg);
+      border-top: 1px solid var(--wr-line);
+      padding: 32px 0;
+    }
+
+    .footer .wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .footer-brand img {
+      height: 26px;
+      width: auto;
+      opacity: 0.6;
+    }
+
+    .footer-brand span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--wr-text-3);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--wr-text-3);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--wr-cyan);
+    }
+  </style>
 </head>
 
 <body data-page="home">
@@ -30,11 +608,11 @@
       </a>
 
       <div class="nav-links">
-        <a href="index.html" data-page="home" class="active">Overview</a>
-        <a href="pages/imu.html" data-page="imu">IMU</a>
-        <a href="pages/motor-control.html" data-page="motor">Motor Control</a>
-        <a href="pages/mechanical.html" data-page="mech">Mechanical</a>
-        <a href="index.html#team" data-page="team">Team</a>
+        <a href="index.html" class="active">Overview</a>
+        <a href="pages/imu.html">IMU</a>
+        <a href="pages/motor-control.html">Motor Control</a>
+        <a href="pages/mechanical.html">Mechanical</a>
+        <a href="index.html#team">Team</a>
       </div>
 
       <div class="nav-tag">
@@ -42,9 +620,7 @@
       </div>
 
       <button class="nav-toggle" aria-label="Toggle menu">
-        <span></span>
-        <span></span>
-        <span></span>
+        <span></span><span></span><span></span>
       </button>
     </div>
   </nav>
@@ -70,71 +646,50 @@
         </p>
 
         <div class="hero-actions">
-          <a href="pages/imu.html" class="btn btn-primary">
-            Explore IMU Subsystem
-          </a>
-
-          <a href="#modules" class="btn btn-ghost">
-            View All Modules
-          </a>
+          <a href="pages/imu.html" class="btn btn-primary">Explore IMU Subsystem</a>
+          <a href="#modules" class="btn btn-ghost">View All Modules</a>
         </div>
       </div>
 
       <div class="hero-visual">
-        <span class="hero-visual-tag">
-          FIG. 01 — TEST RIG, ACTUATED ANKLE-FOOT MODULE
-        </span>
-
-        <img
-          src="images/hero.png"
-          alt="Powered prosthetic leg on a treadmill test rig"
-        >
+        <span class="hero-visual-tag">FIG. 01 — TEST RIG, ACTUATED ANKLE-FOOT MODULE</span>
+        <img src="images/hero.png" alt="Powered prosthetic leg on a treadmill test rig">
       </div>
 
     </div>
   </header>
 
   <!-- ============ STATS ============ -->
-  <section class="section" style="border-top:none; padding-top:0;">
+  <section class="section" style="border-top: none; padding-top: 0;">
     <div class="wrap">
-
       <div class="stats-strip">
-
         <div class="stat">
           <div class="num">3</div>
           <div class="lbl">Core Subsystems</div>
         </div>
-
         <div class="stat">
           <div class="num">6-Axis</div>
           <div class="lbl">IMU — MPU6250</div>
         </div>
-
         <div class="stat">
           <div class="num">I2C</div>
           <div class="lbl">Sensor Bus Protocol</div>
         </div>
-
         <div class="stat">
           <div class="num">Pi 5</div>
           <div class="lbl">Onboard Compute</div>
         </div>
-
       </div>
-
     </div>
   </section>
 
   <!-- ============ MODULES ============ -->
   <section class="section" id="modules">
-
     <div class="wrap">
 
       <div class="section-head">
         <div class="eyebrow">System Architecture</div>
-
         <h2>Three subsystems, one limb.</h2>
-
         <p>
           The prosthesis is built as three independently documented modules.
           Each runs its own setup guide, firmware, and test procedures —
@@ -144,63 +699,53 @@
 
       <div class="module-grid">
 
-        <a href="pages/imu.html" class="module-card" style="text-decoration:none;">
+        <a href="pages/imu.html" class="module-card">
           <span class="mod-status live">Documented</span>
           <span class="mod-id">MODULE 01 // SENSING</span>
           <h3>IMU</h3>
-
           <p>
             Raspberry Pi 5 reads orientation, acceleration, and angular velocity
             from an MPU6250 over I2C — the gait-phase signal the rest of the
             system reacts to. Includes full OS flashing and wiring guide.
           </p>
-
           <span class="mod-link">Open setup guide</span>
         </a>
 
-        <a href="pages/motor-control.html" class="module-card" style="text-decoration:none;">
+        <a href="pages/motor-control.html" class="module-card">
           <span class="mod-status">In Progress</span>
           <span class="mod-id">MODULE 02 // ACTUATION</span>
           <h3>Motor Control</h3>
-
           <p>
             Closed-loop control of the ankle actuator — translating gait-phase
             estimates from the IMU into torque and position commands for the
             drive motor in real time.
           </p>
-
           <span class="mod-link">View module</span>
         </a>
 
-        <a href="pages/mechanical.html" class="module-card" style="text-decoration:none;">
+        <a href="pages/mechanical.html" class="module-card">
           <span class="mod-status">In Progress</span>
           <span class="mod-id">MODULE 03 // STRUCTURE</span>
           <h3>Mechanical</h3>
-
           <p>
             The frame, linkage, and foot assembly that carry load through the
             gait cycle — designed for the actuator's torque profile and the
             wearer's range of motion.
           </p>
-
           <span class="mod-link">View module</span>
         </a>
 
       </div>
-
     </div>
-
   </section>
 
   <!-- ============ TEAM ============ -->
   <section class="section" id="team">
-
     <div class="wrap">
 
       <div class="section-head">
         <div class="eyebrow">Project Lead</div>
         <h2>Led from IIT Jodhpur.</h2>
-
         <p>
           WeRoCon is headed within the Department of Electrical Engineering,
           IIT Jodhpur.
@@ -208,58 +753,40 @@
       </div>
 
       <div class="team-card">
-
         <div class="team-photo">
           <img src="images/saurav.png" alt="Dr. Saurav Kumar">
         </div>
-
         <div class="team-info">
           <div class="role">Head, WeRoCon</div>
-
           <h3>Dr. Saurav Kumar</h3>
-
           <p class="affil">
             Assistant Professor, Department of Electrical Engineering —
             IIT Jodhpur
           </p>
-
           <div class="team-links">
-            <a href="mailto:sauravk@iitj.ac.in">
-              ✉ sauravk@iitj.ac.in
-            </a>
-
-            <a href="https://in.linkedin.com/in/sauravk1" target="_blank" rel="noopener">
-              LinkedIn
-            </a>
-
-            <a href="https://github.com/saurav-rk" target="_blank" rel="noopener">
-              GitHub
-            </a>
+            <a href="mailto:sauravk@iitj.ac.in">✉ sauravk@iitj.ac.in</a>
+            <a href="https://in.linkedin.com/in/sauravk1" target="_blank" rel="noopener">LinkedIn</a>
+            <a href="https://github.com/saurav-rk" target="_blank" rel="noopener">GitHub</a>
           </div>
         </div>
-
       </div>
 
     </div>
-
   </section>
 
   <!-- ============ FOOTER ============ -->
   <footer class="footer">
     <div class="wrap">
-
       <div class="footer-brand">
         <img src="images/logo.png" alt="WeRoCon logo">
         <span>WEROCON — WEARABLE ROBOTICS CONTROL · IIT JODHPUR</span>
       </div>
-
       <div class="footer-links">
         <a href="pages/imu.html">IMU</a>
         <a href="pages/motor-control.html">Motor Control</a>
         <a href="pages/mechanical.html">Mechanical</a>
         <a href="#team">Team</a>
       </div>
-
     </div>
   </footer>
 
